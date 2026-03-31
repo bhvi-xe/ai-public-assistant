@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>AI Public Service Assistant | Smart Government Services</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --surface: #ffffff;
+            --surface-elevated: #f1f5f9;
+            --border: #e2e8f0;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-tertiary: #64748b;
+            --accent: #3b82f6;
+            --accent-dark: #2563eb;
+            --accent-light: #dbeafe;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --user-bubble: #eef2ff;
+            --bot-bubble: #ffffff;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --radius-sm: 0.5rem;
+            --radius-md: 1rem;
+            --radius-lg: 1.5rem;
+        }
+
+        body.dark {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --surface: #1e293b;
+            --surface-elevated: #334155;
+            --border: #334155;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
+            --text-tertiary: #94a3b8;
+            --accent: #3b82f6;
+            --accent-dark: #60a5fa;
+            --accent-light: #1e293b;
+            --user-bubble: #2563eb;
+            --bot-bubble: #334155;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        /* Header */
+        .app-header {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            padding: 1rem 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            box-shadow: var(--shadow-sm);
+            backdrop-filter: blur(10px);
+        }
+
+        .logo-area h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.3px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-dark));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .logo-area p {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+            margin-top: 0.2rem;
+        }
+
+        .controls {
+            display: flex;
+            gap: 0.75rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        select, .theme-btn {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-primary);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.875rem;
+        }
+
+        select:hover, .theme-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .theme-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+        }
+
+        .theme-btn:hover {
+            background: var(--accent-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 2rem;
+        }
+
+        /* Chat Section */
+        .chat-section {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 120px);
+            min-height: 600px;
+            box-shadow: var(--shadow-md);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .chat-section:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .chat-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .chat-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .chat-header p {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+            margin-top: 0.25rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            background: var(--success);
+            color: white;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.6rem;
+            border-radius: 1rem;
+            margin-left: 0.5rem;
+            vertical-align: middle;
+        }
+
+        .chat-box {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        /* Messages */
+        .message {
+            max-width: 85%;
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            animation: fadeIn 0.3s ease;
+            white-space: pre-wrap;
+            word-break: break-word;
+            transition: transform 0.2s ease;
+        }
+
+        .message:hover {
+            transform: translateX(2px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .user-message {
+            align-self: flex-end;
+            background: var(--accent);
+            color: white;
+            border-bottom-right-radius: 0.25rem;
+        }
+
+        .bot-message {
+            align-self: flex-start;
+            background: var(--bot-bubble);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: flex;
+            gap: 4px;
+            padding: 0.75rem 1rem;
+            background: var(--bot-bubble);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            width: fit-content;
+        }
+        .typing-indicator span {
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            borderRadius: 50%;
+            animation: typingPulse 1.2s infinite ease;
+        }
+        .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+        .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes typingPulse {
+            0%, 60%, 100% { transform: scale(0.6); opacity: 0.4; }
+            30% { transform: scale(1); opacity: 1; }
+        }
+
+        /* Input Area */
+        .input-area {
+            padding: 1rem 1.5rem 1.5rem;
+            border-top: 1px solid var(--border);
+            background: var(--surface);
+        }
+
+        .input-wrapper {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 0.25rem 0.5rem;
+            transition: all 0.2s ease;
+        }
+
+        .input-wrapper:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-light);
+        }
+
+        .input-wrapper input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 0.75rem 0.5rem;
+            font-size: 0.9rem;
+            outline: none;
+            color: var(--text-primary);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .input-wrapper input::placeholder {
+            color: var(--text-tertiary);
+        }
+
+        .action-btn {
+            background: var(--accent);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            color: white;
+            font-size: 1.1rem;
+        }
+
+        .action-btn:hover {
+            background: var(--accent-dark);
+            transform: scale(1.05);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+        }
+
+        .action-btn:active {
+            transform: scale(0.98);
+        }
+
+        .voice-status {
+            font-size: 0.7rem;
+            text-align: center;
+            margin-top: 0.5rem;
+            color: var(--text-tertiary);
+            transition: all 0.2s ease;
+        }
+
+        .voice-status.listening {
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        /* Accordion Section - Card Style */
+        .services-section {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            height: fit-content;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+            box-shadow: var(--shadow-md);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .services-section:hover {
+            box-shadow: var(--shadow-lg);
+        }
+
+        .services-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            background: var(--surface);
+            position: sticky;
+            top: 0;
+            z-index: 5;
+        }
+
+        .services-header h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .services-header p {
+            font-size: 0.8rem;
+            color: var(--text-tertiary);
+            margin-top: 0.25rem;
+        }
+
+        .accordion-container {
+            padding: 0.75rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        /* Accordion Item - Card Style with Enhanced Hover */
+        .accordion-item {
+            background: var(--surface-elevated);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .accordion-item:hover {
+            border-color: var(--accent);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .accordion-header {
+            width: 100%;
+            padding: 1rem 1.25rem;
+            background: var(--surface);
+            border: none;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .accordion-header:hover {
+            background: var(--surface-elevated);
+            padding-left: 1.5rem;
+        }
+
+        .accordion-icon {
+            font-size: 1rem;
+            transition: transform 0.3s ease;
+            color: var(--accent);
+        }
+
+        .accordion-item.open .accordion-icon {
+            transform: rotate(180deg);
+        }
+
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--surface-elevated);
+            border-top: 1px solid var(--border);
+        }
+
+        .accordion-item.open .accordion-content {
+            max-height: 800px;
+        }
+
+        .accordion-inner {
+            padding: 1rem 1.25rem;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
+        }
+
+        .accordion-inner p {
+            margin-bottom: 0.5rem;
+        }
+
+        .accordion-inner strong {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .quick-btn {
+            width: 100%;
+            margin-top: 0.75rem;
+            padding: 0.6rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .quick-btn:hover {
+            background: var(--accent-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .quick-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Scrollbar */
+        .chat-box::-webkit-scrollbar, .services-section::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-box::-webkit-scrollbar-track, .services-section::-webkit-scrollbar-track {
+            background: var(--surface-elevated);
+            border-radius: 10px;
+        }
+        .chat-box::-webkit-scrollbar-thumb, .services-section::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 10px;
+        }
+        .chat-box::-webkit-scrollbar-thumb:hover, .services-section::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-dark);
+        }
+
+        @media (max-width: 900px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+            .chat-section {
+                height: 500px;
+                min-height: 450px;
+            }
+            .services-section {
+                max-height: 500px;
+            }
+            .app-header {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header class="app-header">
+    <div class="logo-area">
+        <h1>AI Public Service Assistant</h1>
+        <p>Smart Government Services Guide <span id="systemStatus" class="status-badge">Active</span></p>
+    </div>
+    <div class="controls">
+        <select id="languageSelect">
+            <option value="en">English</option>
+            <option value="hi">हिंदी</option>
+            <option value="ta">தமிழ்</option>
+            <option value="kn">ಕನ್ನಡ</option>
+            <option value="te">తెలుగు</option>
+            <option value="bn">বাংলা</option>
+        </select>
+        <button id="themeToggleBtn" class="theme-btn">Dark Mode</button>
+    </div>
+</header>
+
+<div class="main-container">
+    <div class="chat-section">
+        <div class="chat-header">
+            <h3>Ask Me Anything <span id="chatStatus" class="status-badge">Ready</span></h3>
+            <p>Get detailed information about government services in your preferred language</p>
+        </div>
+        <div class="chat-box" id="chatBox"></div>
+        <div class="input-area">
+            <div class="input-wrapper">
+                <input type="text" id="userInput" placeholder="Type your question... (e.g., driving license process)" autocomplete="off">
+                <button class="action-btn" id="sendBtn" title="Send message">→</button>
+                <button class="action-btn" id="voiceBtn" title="Voice input">🎤</button>
+            </div>
+            <div id="voiceStatus" class="voice-status"></div>
+        </div>
+    </div>
+
+    <div class="services-section">
+        <div class="services-header">
+            <h3>Government Services Guide</h3>
+            <p>Click on any service to view detailed information</p>
+        </div>
+        <div class="accordion-container" id="accordionContainer"></div>
+    </div>
+</div>
+
+<script>
+    // Complete multilingual knowledge base for all 6 languages
+    const knowledge = {
+        en: {
+            welcome: "Welcome to AI Public Service Assistant. I am your AI-powered public service assistant. I provide detailed, step-by-step guidance for government services including Driving License, Passport, Aadhaar, PAN Card, Voter ID, and more. How can I help you today?",
+            driving: "Driving License - Complete Guide\n\nStep 1: Visit the official Sarathi Parivahan website (parivahan.gov.in).\nStep 2: Register with your mobile number and email.\nStep 3: Fill Form 2 for Learner's License. Upload documents: Age proof (Birth certificate or 10th certificate), Address proof (Aadhaar, Voter ID, Passport), and passport-size photo.\nStep 4: Pay the fee online and schedule your Learner's License test at the nearest RTO.\nStep 5: Pass the computer-based test to receive Learner's License (valid for 6 months).\nStep 6: After 30 days, apply for Permanent Driving License using Form 4. Book a driving test slot.\nStep 7: Pass the driving test at RTO. License is delivered by post in 2-3 weeks.\n\nDocuments Required: Aadhaar, PAN, Proof of age, Address proof, 3 passport-size photos.\nProcessing Time: 30-45 days for permanent license.",
+            passport: "Passport Application - Detailed Process\n\nStep 1: Visit the official Passport Seva Portal (passportindia.gov.in).\nStep 2: Register as a new user and log in.\nStep 3: Fill the online application form (Form 1 for fresh passport or reissue). Choose between Normal scheme (30-45 days) or Tatkaal scheme (urgent, 5-7 days).\nStep 4: Pay the application fee online.\nStep 5: Book an appointment at the nearest Passport Seva Kendra (PSK).\nStep 6: Visit PSK on scheduled date with original documents: Proof of Date of Birth, Address proof (Aadhaar, Voter ID, Electricity bill), and identity proof.\nStep 7: Complete biometric enrollment, photograph, and document verification.\nStep 8: Police verification is conducted at your residence.\nStep 9: Passport is printed and delivered via India Post within 2-4 weeks for Normal, 1 week for Tatkaal.\n\nHelpline: 1800-258-1800",
+            aadhaar: "Aadhaar Services - Comprehensive Information\n\nNew Enrolment: Visit any authorized Aadhaar Enrollment Center. Carry valid Proof of Identity (POI) and Proof of Address (POA) – includes Passport, Voter ID, Driving License, Bank Passbook. Biometrics (fingerprints and iris scan) and photograph are captured. Enrollment number is provided. Aadhaar letter arrives by post in 60-90 days.\n\nAadhaar Update (Online): Visit uidai.gov.in, select Update Aadhaar, upload supporting documents. Address updates can be done online with nominal fee.\n\nAadhaar Update (Offline): Visit Permanent Enrolment Centre with self-attested copies.\n\nVirtual ID (VID): Generate 16-digit VID from UIDAI portal for secure authentication without sharing Aadhaar number.\n\nmAadhaar App: Manage Aadhaar on mobile, download digital Aadhaar, lock or unlock biometrics.\n\nToll Free: 1947\nOfficial Portal: uidai.gov.in",
+            pan: "PAN Card - Application and Correction Guide\n\nApply Online: Visit NSDL (protean-tinpan.com) or UTIITSL portal. Select New PAN Application (Form 49A for Indian citizens).\n\nDocuments Required: Proof of Identity (Aadhaar, Voter ID, Passport), Proof of Address, Proof of Date of Birth (Birth certificate, 10th marksheet).\n\nPhoto and Signature: Upload recent photograph and signature.\n\nFee Payment: 107 rupees (including GST) for Indian communication address.\n\nDigital PAN: Issued within 3-5 business days via email. Physical PAN card delivered by post in 10-15 days.\n\nCorrection or Update: Use Change or Correction in PAN Data form on NSDL or UTIITSL portal.\n\nE-PAN: Free e-PAN can be downloaded from income tax portal if Aadhaar is linked.\n\nImportant: PAN is mandatory for financial transactions, ITR filing, and banking.",
+            voter: "Voter ID (EPIC) - Registration and Services\n\nNew Registration (Form 6): Visit National Voter's Service Portal (nvsp.in). Fill Form 6 with personal details, upload proof of age (Birth certificate, Class 10 certificate), proof of address (Aadhaar, Passport, Driving License), and a passport-size photograph. Application is submitted online or offline at Electoral Registration Office.\n\nCorrection in Details (Form 8): For name, address, photo, or constituency changes, submit Form 8 online.\n\nTransposition (Form 8A): For shifting within same constituency.\n\nTrack Status: Use portal to track application status. Once approved, EPIC card is sent by post.\n\nCheck Name in Electoral Roll: Visit electoralsearch.eci.gov.in.\n\nOnline Voter Helpline App: Available for easy access.\n\nDeadlines: Register before election notification to be eligible to vote.\nECI Helpline: 1950",
+            greeting: "Namaste. I am your dedicated public service assistant. I provide accurate, step-by-step guidance for all major government services. Feel free to ask about Driving License, Passport, Aadhaar, PAN Card, Voter ID, and more.",
+            help: "How to Use This Assistant\n\nYou can ask detailed questions about:\n\n1. Driving License – Process, documents, fees, test details.\n2. Passport – Fresh, renewal, Tatkaal, documentation.\n3. Aadhaar – Enrolment, updates, VID, biometric lock.\n4. PAN Card – Online application, corrections, e-PAN.\n5. Voter ID – Registration, correction, checking roll.\n\nTips: Be specific for better answers. Use the accordion cards on the right for quick reference.",
+            fallback: "I could not fully understand your request. Please rephrase your question or select one of the service cards on the right. You can ask about Driving License, Passport, Aadhaar, PAN Card, or Voter ID. Type help for assistance."
+        },
+        hi: {
+            welcome: "AI पब्लिक सर्विस असिस्टेंट में आपका स्वागत है। मैं आपका AI सहायक हूँ। मैं ड्राइविंग लाइसेंस, पासपोर्ट, आधार, पैन कार्ड, वोटर आईडी सहित सरकारी सेवाओं के लिए विस्तृत चरण-दर-चरण मार्गदर्शन प्रदान करता हूँ। आज मैं आपकी कैसे सहायता कर सकता हूँ?",
+            driving: "ड्राइविंग लाइसेंस - संपूर्ण गाइड\n\nचरण 1: आधिकारिक सारथी परिवहन वेबसाइट (parivahan.gov.in) पर जाएँ।\nचरण 2: मोबाइल नंबर और ईमेल से पंजीकरण करें।\nचरण 3: लर्नर लाइसेंस के लिए फॉर्म 2 भरें। दस्तावेज़ अपलोड करें: आयु प्रमाण (जन्म प्रमाण पत्र या 10वीं का प्रमाण पत्र), पता प्रमाण (आधार, वोटर आईडी, पासपोर्ट), और पासपोर्ट साइज़ फोटो।\nचरण 4: शुल्क का ऑनलाइन भुगतान करें और निकटतम RTO में लर्नर लाइसेंस परीक्षा का समय बुक करें।\nचरण 5: कंप्यूटर आधारित परीक्षा पास करें (6 महीने के लिए वैध)।\nचरण 6: 30 दिनों के बाद, फॉर्म 4 का उपयोग करके स्थायी ड्राइविंग लाइसेंस के लिए आवेदन करें।\nचरण 7: RTO में ड्राइविंग टेस्ट पास करें। लाइसेंस 2-3 सप्ताह में डाक से मिलेगा।\n\nआवश्यक दस्तावेज़: आधार, आयु प्रमाण, पता प्रमाण, 3 पासपोर्ट साइज़ फोटो।\nप्रक्रिया समय: स्थायी लाइसेंस के लिए 30-45 दिन।",
+            passport: "पासपोर्ट आवेदन - विस्तृत प्रक्रिया\n\nचरण 1: आधिकारिक पासपोर्ट सेवा पोर्टल (passportindia.gov.in) पर जाएँ।\nचरण 2: नए उपयोगकर्ता के रूप में पंजीकरण करें और लॉगिन करें।\nचरण 3: ऑनलाइन आवेदन पत्र भरें। सामान्य योजना (30-45 दिन) या तत्काल योजना (5-7 दिन) चुनें।\nचरण 4: आवेदन शुल्क का ऑनलाइन भुगतान करें।\nचरण 5: निकटतम पासपोर्ट सेवा केंद्र (PSK) में अपॉइंटमेंट बुक करें।\nचरण 6: निर्धारित तिथि पर मूल दस्तावेज़ों के साथ PSK जाएँ।\nचरण 7: बायोमेट्रिक, फोटोग्राफ और दस्तावेज़ सत्यापन पूरा करें।\nचरण 8: पुलिस सत्यापन किया जाता है।\nचरण 9: पासपोर्ट 2-4 सप्ताह (सामान्य) या 1 सप्ताह (तत्काल) में डाक से मिलता है।\n\nहेल्पलाइन: 1800-258-1800",
+            aadhaar: "आधार सेवाएँ - व्यापक जानकारी\n\nनया नामांकन: किसी अधिकृत आधार नामांकन केंद्र पर जाएँ। पहचान प्रमाण और पता प्रमाण साथ ले जाएँ। बायोमेट्रिक और फोटोग्राफ ली जाती है। आधार पत्र 60-90 दिनों में डाक से आता है।\n\nआधार अपडेट (ऑनलाइन): uidai.gov.in पर जाएँ, 'अपडेट आधार' चुनें, दस्तावेज़ अपलोड करें।\n\nआधार अपडेट (ऑफलाइन): स्थायी नामांकन केंद्र पर जाएँ।\n\nवर्चुअल आईडी (VID): UIDAI पोर्टल से 16 अंकों की VID बनाएँ।\n\nटोल फ्री: 1947",
+            pan: "पैन कार्ड - आवेदन और सुधार गाइड\n\nऑनलाइन आवेदन: NSDL (protean-tinpan.com) या UTIITSL पोर्टल पर जाएँ। नया पैन आवेदन चुनें (फॉर्म 49A)।\n\nआवश्यक दस्तावेज़: पहचान प्रमाण, पता प्रमाण, जन्म तिथि प्रमाण।\n\nशुल्क: 107 रुपये।\n\nडिजिटल पैन: 3-5 दिनों में ईमेल द्वारा। भौतिक पैन कार्ड 10-15 दिनों में डाक से।\n\nई-पैन: आधार लिंक होने पर आयकर पोर्टल से डाउनलोड करें।",
+            voter: "वोटर आईडी - पंजीकरण और सेवाएँ\n\nनया पंजीकरण (फॉर्म 6): NVSP (nvsp.in) पोर्टल पर जाएँ। फॉर्म 6 भरें, आयु प्रमाण, पता प्रमाण, फोटो अपलोड करें।\n\nसुधार (फॉर्म 8): नाम, पता, फोटो बदलने के लिए फॉर्म 8 जमा करें।\n\nमतदाता सूची में नाम जाँचें: electoralsearch.eci.gov.in\n\nECI हेल्पलाइन: 1950",
+            greeting: "नमस्ते। मैं आपका समर्पित सार्वजनिक सेवा सहायक हूँ। ड्राइविंग लाइसेंस, पासपोर्ट, आधार, पैन कार्ड, वोटर आईडी के बारे में पूछें।",
+            help: "सहायता केंद्र\n\nआप पूछ सकते हैं:\n1. ड्राइविंग लाइसेंस – प्रक्रिया, दस्तावेज़\n2. पासपोर्ट – नया, नवीनीकरण, तत्काल\n3. आधार – नामांकन, अपडेट, VID\n4. पैन कार्ड – ऑनलाइन आवेदन\n5. वोटर आईडी – पंजीकरण, सुधार",
+            fallback: "मैं आपके अनुरोध को पूरी तरह से समझ नहीं पाया। कृपया अपना प्रश्न दोबारा लिखें या दाईं ओर सेवा कार्ड चुनें।"
+        },
+        ta: {
+            welcome: "AI பொதுச் சேவை உதவியாளருக்கு வரவேற்கிறோம். நான் உங்கள் AI உதவியாளர். ஓட்டுநர் உரிமம், கடவுச்சீட்டு, ஆதார், பான் கார்டு, வாக்காளர் அட்டை உள்ளிட்ட அனைத்து அரசு சேவைகளுக்கும் விரிவான வழிகாட்டியை வழங்குகிறேன்.",
+            driving: "ஓட்டுநர் உரிமம் - முழு வழிகாட்டி\n\nபடி 1: சாரதி போர்த்தளம் (parivahan.gov.in) இல் பதிவு செய்யவும்.\nபடி 2: கற்றல் உரிமத்திற்கு விண்ணப்பிக்கவும். வயது சான்று, முகவரி சான்று மற்றும் புகைப்படம் பதிவேற்றவும்.\nபடி 3: கட்டணம் செலுத்தி, அருகிலுள்ள RTO இல் தேர்வு நேரத்தை முன்பதிவு செய்யவும்.\nபடி 4: கணினி தேர்வில் தேர்ச்சி பெற்று கற்றல் உரிமத்தைப் பெறவும்.\nபடி 5: 30 நாட்களுக்குப் பிறகு நிரந்தர உரிமத்திற்கு விண்ணப்பிக்கவும்.\nபடி 6: RTO இல் ஓட்டுநர் தேர்வில் தேர்ச்சி பெறவும்.\n\nதேவையான ஆவணங்கள்: ஆதார், வயது சான்று, முகவரி சான்று.",
+            passport: "கடவுச்சீட்டு விண்ணப்பம் - விரிவான செயல்முறை\n\nபடி 1: passportindia.gov.in இல் பதிவு செய்யவும்.\nபடி 2: படிவம் 1ஐ நிரப்பி, சாதாரண அல்லது தட்கால் திட்டத்தைத் தேர்ந்தெடுக்கவும்.\nபடி 3: கட்டணம் செலுத்தி, PSK இல் நேரம் முன்பதிவு செய்யவும்.\nபடி 4: PSK க்கு சென்று உண்மையான ஆவணங்களை சமர்ப்பிக்கவும்.\nபடி 5: காவலர் சரிபார்ப்பு நிறைவேறிய பின், கடவுச்சீட்டு அஞ்சல் மூலம் வழங்கப்படும்.\n\nஉதவி எண்: 1800-258-1800",
+            aadhaar: "ஆதார் சேவைகள் - முழு விவரம்\n\nபுதிய பதிவு: அருகிலுள்ள ஆதார் மையத்தை அணுகவும். அடையாள ஆவணம் மற்றும் முகவரி ஆவணம் எடுத்துச் செல்லவும். ஆதார் அஞ்சல் மூலம் 60-90 நாட்களில் வரும்.\n\nஆதார் திருத்தம்: uidai.gov.in பார்வையிடவும்.\n\nமெய்நிகர் ID: 16 இலக்க VID ஐ உருவாக்கவும்.\n\nஇலவச எண்: 1947",
+            pan: "பான் கார்டு - விண்ணப்பம் மற்றும் திருத்தம்\n\nஇணைய விண்ணப்பம்: NSDL அல்லது UTIITSL போர்ட்டலை பார்வையிடவும்.\n\nதேவையான ஆவணங்கள்: அடையாள ஆவணம், முகவரி சான்று, பிறந்த தேதி சான்று.\n\nகட்டணம்: 107 ரூபாய்.\n\nடிஜிட்டல் பான்: 3-5 நாட்களில் மின்னஞ்சலில் வரும்.",
+            voter: "வாக்காளர் அட்டை - பதிவு மற்றும் சேவைகள்\n\nபுதிய பதிவு: NVSP (nvsp.in) போர்ட்டலில் படிவம் 6ஐ நிரப்பவும்.\n\nதிருத்தம்: படிவம் 8 சமர்ப்பிக்கவும்.\n\nECI உதவி எண்: 1950",
+            greeting: "வணக்கம். நான் உங்கள் அரசு சேவை உதவியாளர்.",
+            help: "உதவி மையம்\n\nகேட்கக்கூடிய சேவைகள்:\n1. ஓட்டுநர் உரிமம்\n2. கடவுச்சீட்டு\n3. ஆதார்\n4. பான் கார்டு\n5. வாக்காளர் அட்டை",
+            fallback: "புரியவில்லை. தயவுசெய்து சரியாகக் கேளுங்கள்."
+        },
+        kn: {
+            welcome: "AI ಸಾರ್ವಜನಿಕ ಸೇವಾ ಸಹಾಯಕಕ್ಕೆ ಸ್ವಾಗತ. ನಾನು ನಿಮ್ಮ AI ಸಹಾಯಕ. ಚಾಲನಾ ಪರವಾನಗಿ, ಪಾಸ್ಪೋರ್ಟ್, ಆಧಾರ್, ಪಾನ್ ಕಾರ್ಡ್, ಮತದಾರರ ಗುರುತಿನ ಬಗ್ಗೆ ಮಾಹಿತಿ ನೀಡುತ್ತೇನೆ.",
+            driving: "ಚಾಲನಾ ಪರವಾನಗಿ - ಸಂಪೂರ್ಣ ಮಾರ್ಗದರ್ಶಿ\n\nಹಂತ 1: ಸಾರಥಿ ಪೋರ್ಟಲ್ ನಲ್ಲಿ ನೋಂದಣಿ\nಹಂತ 2: ಕಲಿಯುವವರ ಪರವಾನಗಿಗೆ ಅರ್ಜಿ\nಹಂತ 3: ಶುಲ್ಕ ಪಾವತಿಸಿ, RTO ನಲ್ಲಿ ಪರೀಕ್ಷೆ ಬುಕ್ ಮಾಡಿ\nಹಂತ 4: ಕಂಪ್ಯೂಟರ್ ಪರೀಕ್ಷೆಯಲ್ಲಿ ಉತ್ತೀರ್ಣರಾಗಿ\nಹಂತ 5: 30 ದಿನಗಳ ನಂತರ ಶಾಶ್ವತ ಪರವಾನಗಿಗೆ ಅರ್ಜಿ\nಹಂತ 6: ಚಾಲನಾ ಪರೀಕ್ಷೆಯಲ್ಲಿ ಉತ್ತೀರ್ಣರಾಗಿ",
+            passport: "ಪಾಸ್ಪೋರ್ಟ್ ಅರ್ಜಿ - ವಿವರವಾದ ಪ್ರಕ್ರಿಯೆ\n\nಹಂತ 1: passportindia.gov.in ನಲ್ಲಿ ನೋಂದಣಿ\nಹಂತ 2: ಫಾರ್ಮ್ ಭರ್ತಿ ಮಾಡಿ\nಹಂತ 3: ಶುಲ್ಕ ಪಾವತಿಸಿ, PSK ನಲ್ಲಿ ಅಪಾಯಿಂಟ್ಮೆಂಟ್ ಬುಕ್ ಮಾಡಿ\nಹಂತ 4: ಮೂಲ ದಾಖಲೆಗಳೊಂದಿಗೆ PSK ಗೆ ಭೇಟಿ ನೀಡಿ\nಹಂತ 5: ಪೋಲೀಸ್ ಪರಿಶೀಲನೆಯ ನಂತರ ಪಾಸ್ಪೋರ್ಟ್ ಅಂಚೆಯಿಂದ ಬರುತ್ತದೆ",
+            aadhaar: "ಆಧಾರ್ ಸೇವೆಗಳು\n\nಹೊಸ ನೋಂದಣಿ: ಆಧಾರ್ ಕೇಂದ್ರಕ್ಕೆ ಭೇಟಿ ನೀಡಿ\nಆನ್ಲೈನ್ ನವೀಕರಣ: uidai.gov.in\nವರ್ಚುವಲ್ ಐಡಿ: 16 ಅಂಕೆಯ VID ರಚಿಸಿ\nಟೋಲ್ ಫ್ರೀ: 1947",
+            pan: "ಪಾನ್ ಕಾರ್ಡ್\n\nಆನ್ಲೈನ್ ಅರ್ಜಿ: NSDL ಅಥವಾ UTIITSL\nಶುಲ್ಕ: 107 ರೂಪಾಯಿಗಳು\nಡಿಜಿಟಲ್ ಪಾನ್: 3-5 ದಿನಗಳಲ್ಲಿ ಇಮೇಲ್ ನಲ್ಲಿ",
+            voter: "ಮತದಾರರ ಗುರುತು\n\nಹೊಸ ನೋಂದಣಿ: nvsp.in ನಲ್ಲಿ ಫಾರ್ಮ್ 6\nತಿದ್ದುಪಡಿ: ಫಾರ್ಮ್ 8\nECI ಹೆಲ್ಪ್ಲೈನ್: 1950",
+            greeting: "ನಮಸ್ಕಾರ. ನಾನು ನಿಮ್ಮ ಸರ್ಕಾರಿ ಸೇವಾ ಸಹಾಯಕ.",
+            help: "ಸಹಾಯ ಕೇಂದ್ರ\n\n1. ಚಾಲನಾ ಪರವಾನಗಿ\n2. ಪಾಸ್ಪೋರ್ಟ್\n3. ಆಧಾರ್\n4. ಪಾನ್ ಕಾರ್ಡ್\n5. ಮತದಾರರ ಗುರುತು",
+            fallback: "ದಯವಿಟ್ಟು ಸರಿಯಾಗಿ ಕೇಳಿ ಅಥವಾ ಬಲಭಾಗದ ಸೇವಾ ಕಾರ್ಡ್ ಗಳನ್ನು ಬಳಸಿ."
+        },
+        te: {
+            welcome: "AI పబ్లిక్ సర్వీస్ అసిస్టెంట్ కు స్వాగతం. నేను మీ AI సహాయకుడిని. డ్రైవింగ్ లైసెన్స్, పాస్పోర్ట్, ఆధార్, పాన్ కార్డ్, ఓటరు ID గురించి వివరాలు ఇస్తాను.",
+            driving: "డ్రైవింగ్ లైసెన్స్ - పూర్తి గైడ్\n\nదశ 1: సారథి పోర్టల్ లో నమోదు\nదశ 2: లెర్నర్ లైసెన్స్ కు దరఖాస్తు\nదశ 3: ఫీజు చెల్లించి, RTO లో పరీక్ష బుక్ చేయండి\nదశ 4: కంప్యూటర్ పరీక్షలో ఉత్తీర్ణత పొందండి\nదశ 5: 30 రోజుల తర్వాత శాశ్వత లైసెన్స్ కు దరఖాస్తు చేయండి",
+            passport: "పాస్పోర్ట్ దరఖాస్తు\n\nదశ 1: passportindia.gov.in లో నమోదు\nదశ 2: ఫారం భర్తీ చేయండి\nదశ 3: ఫీజు చెల్లించి, PSK లో అపాయింట్మెంట్ తీసుకోండి\nదశ 4: అసలు డాక్యుమెంట్లతో PSK కు వెళ్లండి\nదశ 5: పోలీస్ ధృవీకరణ తర్వాత పాస్పోర్ట్ పోస్ట్ ద్వారా వస్తుంది",
+            aadhaar: "ఆధార్ సేవలు\n\nకొత్త నమోదు: ఆధార్ కేంద్రాన్ని సందర్శించండి\nఆన్‌లైన్ నవీకరణ: uidai.gov.in\nవర్చువల్ ID: 16 అంకెల VID\nటోల్ ఫ్రీ: 1947",
+            pan: "పాన్ కార్డ్\n\nఆన్‌లైన్ దరఖాస్తు: NSDL లేదా UTIITSL\nఫీజు: 107 రూపాయలు\nడిజిటల్ పాన్: 3-5 రోజుల్లో ఇమెయిల్ ద్వారా",
+            voter: "ఓటరు ID\n\nకొత్త నమోదు: nvsp.in లో ఫారం 6\nదిద్దుబాటు: ఫారం 8\nECI హెల్ప్‌లైన్: 1950",
+            greeting: "నమస్కారం. నేను మీ ప్రభుత్వ సేవా సహాయకుడిని.",
+            help: "సహాయ కేంద్రం\n\n1. డ్రైవింగ్ లైసెన్స్\n2. పాస్పోర్ట్\n3. ఆధార్\n4. పాన్ కార్డ్\n5. ఓటరు ID",
+            fallback: "దయచేసి సరిగ్గా అడగండి లేదా కుడివైపు సేవా కార్డ్ లను ఉపయోగించండి."
+        },
+        bn: {
+            welcome: "AI পাবলিক সার্ভিস অ্যাসিস্ট্যান্টে স্বাগতম। আমি আপনার AI সহায়ক। ড্রাইভিং লাইসেন্স, পাসপোর্ট, আধার, প্যান কার্ড, ভোটার আইডি সম্পর্কে বিস্তারিত জানাব।",
+            driving: "ড্রাইভিং লাইসেন্স - সম্পূর্ণ গাইড\n\nধাপ 1: সারথি পোর্টালে নিবন্ধন\nধাপ 2: লার্নার লাইসেন্সের জন্য আবেদন\nধাপ 3: ফি পরিশোধ করে RTO তে পরীক্ষার সময় বুক করুন\nধাপ 4: কম্পিউটার পরীক্ষায় পাস করুন\nধাপ 5: 30 দিন পর স্থায়ী লাইসেন্সের জন্য আবেদন করুন\nধাপ 6: ড্রাইভিং টেস্টে পাস করুন",
+            passport: "পাসপোর্ট আবেদন\n\nধাপ 1: passportindia.gov.in এ নিবন্ধন\nধাপ 2: ফর্ম পূরণ করুন\nধাপ 3: ফি পরিশোধ করে PSK এ অ্যাপয়েন্টমেন্ট নিন\nধাপ 4: মূল ডকুমেন্টসহ PSK এ যান\nধাপ 5: পুলিশ ভেরিফিকেশনের পর পাসপোর্ট ডাকযোগে আসবে",
+            aadhaar: "আধার সেবা\n\nনতুন নিবন্ধন: আধার কেন্দ্রে যোগাযোগ করুন\nঅনলাইন আপডেট: uidai.gov.in\nভার্চুয়াল আইডি: 16 অঙ্কের VID\nটোল ফ্রি: 1947",
+            pan: "প্যান কার্ড\n\nঅনলাইন আবেদন: NSDL বা UTIITSL\nফি: ১০৭ টাকা\nডিজিটাল প্যান: ৩-৫ দিনে ইমেইলে",
+            voter: "ভোটার আইডি\n\nনতুন নিবন্ধন: nvsp.in এ ফর্ম ৬\nসংশোধন: ফর্ম ৮\nECI হেল্পলাইন: ১৯৫০",
+            greeting: "নমস্কার। আমি আপনার সরকারি সেবা সহায়ক।",
+            help: "সহায়তা কেন্দ্র\n\n1. ড্রাইভিং লাইসেন্স\n2. পাসপোর্ট\n3. আধার\n4. প্যান কার্ড\n5. ভোটার আইডি",
+            fallback: "দয়া করে সঠিকভাবে প্রশ্ন করুন বা ডানদিকের সার্ভিস কার্ড ব্যবহার করুন।"
+        }
+    };
+
+    let currentLang = 'en';
+    let recognition = null;
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.interimResults = false;
+    }
+
+    const chatBox = document.getElementById('chatBox');
+    const userInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const voiceBtn = document.getElementById('voiceBtn');
+    const languageSelect = document.getElementById('languageSelect');
+    const themeToggle = document.getElementById('themeToggleBtn');
+    const voiceStatusSpan = document.getElementById('voiceStatus');
+    const chatStatusSpan = document.getElementById('chatStatus');
+
+    function getText(key) {
+        return knowledge[currentLang]?.[key] || knowledge.en[key] || "Information available.";
+    }
+
+    function updateSystemStatus(message, type = 'info') {
+        chatStatusSpan.textContent = message;
+        chatStatusSpan.style.background = type === 'active' ? 'var(--success)' : 'var(--accent)';
+        setTimeout(() => {
+            if (type !== 'active') {
+                chatStatusSpan.textContent = 'Ready';
+                chatStatusSpan.style.background = 'var(--success)';
+            }
+        }, 2000);
+    }
+
+    function addMessage(text, type, skipTyping = false) {
+        const msgDiv = document.createElement('div');
+        msgDiv.className = `message ${type === 'user' ? 'user-message' : 'bot-message'}`;
+        if (type === 'bot' && !skipTyping) {
+            msgDiv.innerText = '';
+            chatBox.appendChild(msgDiv);
+            let i = 0;
+            const interval = setInterval(() => {
+                if (i < text.length) {
+                    msgDiv.innerText += text[i];
+                    i++;
+                    chatBox.scrollTop = chatBox.scrollHeight;
+                } else clearInterval(interval);
+            }, 8);
+        } else {
+            msgDiv.innerText = text;
+            chatBox.appendChild(msgDiv);
+        }
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    let loaderDiv = null;
+    function showLoader() {
+        if (loaderDiv) loaderDiv.remove();
+        loaderDiv = document.createElement('div');
+        loaderDiv.className = 'typing-indicator';
+        loaderDiv.innerHTML = '<span></span><span></span><span></span>';
+        chatBox.appendChild(loaderDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
+    }
+    function hideLoader() { if (loaderDiv && loaderDiv.parentNode) loaderDiv.remove(); loaderDiv = null; }
+
+    async function botReply(userMsg) {
+        showLoader();
+        updateSystemStatus('Thinking...', 'info');
+        await new Promise(r => setTimeout(r, 500));
+        const lower = userMsg.toLowerCase();
+        let resp = "";
+        if (lower.includes("driving") || lower.includes("license") || lower.includes("dl") || lower.includes("ड्राइविंग") || lower.includes("ஓட்டுநர்")) resp = getText('driving');
+        else if (lower.includes("passport") || lower.includes("पासपोर्ट") || lower.includes("கடவுச்சீட்டு")) resp = getText('passport');
+        else if (lower.includes("aadhaar") || lower.includes("aadhar") || lower.includes("आधार") || lower.includes("ஆதார்")) resp = getText('aadhaar');
+        else if (lower.includes("pan") || lower.includes("पैन") || lower.includes("பான்")) resp = getText('pan');
+        else if (lower.includes("voter") || lower.includes("वोटर") || lower.includes("வாக்காளர்")) resp = getText('voter');
+        else if (lower.includes("hi") || lower.includes("hello") || lower.includes("नमस्ते") || lower.includes("வணக்கம்")) resp = getText('greeting');
+        else if (lower.includes("help") || lower.includes("सहायता") || lower.includes("உதவி")) resp = getText('help');
+        else resp = getText('fallback');
+        hideLoader();
+        addMessage(resp, "bot");
+        speakResponse(resp);
+        updateSystemStatus('Ready', 'active');
+    }
+
+    function sendMessage() {
+        let txt = userInput.value.trim();
+        if (!txt) return;
+        addMessage(txt, "user");
+        userInput.value = "";
+        botReply(txt);
+    }
+
+    function startVoice() {
+        if (!recognition) {
+            voiceStatusSpan.innerText = "Voice not supported in this browser";
+            setTimeout(() => voiceStatusSpan.innerText = "", 2000);
+            return;
+        }
+        voiceStatusSpan.innerText = "Listening... speak now";
+        voiceStatusSpan.classList.add('listening');
+        recognition.lang = currentLang === 'en' ? 'en-IN' : (currentLang === 'hi' ? 'hi-IN' : 'en-IN');
+        recognition.start();
+        recognition.onresult = (e) => {
+            userInput.value = e.results[0][0].transcript;
+            voiceStatusSpan.innerText = "Recognized!";
+            voiceStatusSpan.classList.remove('listening');
+            setTimeout(() => voiceStatusSpan.innerText = "", 1500);
+            sendMessage();
+        };
+        recognition.onerror = () => { 
+            voiceStatusSpan.innerText = "Error, please type your question";
+            voiceStatusSpan.classList.remove('listening');
+            setTimeout(() => voiceStatusSpan.innerText = "", 2000);
+        };
+    }
+
+    function speakResponse(text) {
+        let clean = text.replace(/[^\w\s\d.,!?()\-:]/g, '');
+        let utterance = new SpeechSynthesisUtterance(clean.substring(0, 300));
+        utterance.lang = currentLang === 'en' ? 'en-IN' : (currentLang === 'hi' ? 'hi-IN' : 'en-IN');
+        utterance.rate = 0.9;
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(utterance);
+    }
+
+    function buildAccordion() {
+        const container = document.getElementById('accordionContainer');
+        const services = [
+            { key: 'driving', nameEn: 'Driving License', nameHi: 'ड्राइविंग लाइसेंस', nameTa: 'ஓட்டுநர் உரிமம்', nameKn: 'ಚಾಲನಾ ಪರವಾನಗಿ', nameTe: 'డ్రైవింగ్ లైసెన్స్', nameBn: 'ড্রাইভিং লাইসেন্স' },
+            { key: 'passport', nameEn: 'Passport', nameHi: 'पासपोर्ट', nameTa: 'கடவுச்சீட்டு', nameKn: 'ಪಾಸ್ಪೋರ್ಟ್', nameTe: 'పాస్పోర్ట్', nameBn: 'পাসপোর্ট' },
+            { key: 'aadhaar', nameEn: 'Aadhaar', nameHi: 'आधार', nameTa: 'ஆதார்', nameKn: 'ಆಧಾರ್', nameTe: 'ఆధార్', nameBn: 'আধার' },
+            { key: 'pan', nameEn: 'PAN Card', nameHi: 'पैन कार्ड', nameTa: 'பான் கார்டு', nameKn: 'ಪಾನ್ ಕಾರ್ಡ್', nameTe: 'పాన్ కార్డ్', nameBn: 'প্যান কার্ড' },
+            { key: 'voter', nameEn: 'Voter ID', nameHi: 'वोटर आईडी', nameTa: 'வாக்காளர் அட்டை', nameKn: 'ಮತದಾರರ ಗುರುತು', nameTe: 'ఓటరు ID', nameBn: 'ভোটার আইডি' }
+        ];
+        container.innerHTML = '';
+        services.forEach(service => {
+            let displayName = service.nameEn;
+            if (currentLang === 'hi') displayName = service.nameHi;
+            else if (currentLang === 'ta') displayName = service.nameTa;
+            else if (currentLang === 'kn') displayName = service.nameKn;
+            else if (currentLang === 'te') displayName = service.nameTe;
+            else if (currentLang === 'bn') displayName = service.nameBn;
+            
+            const item = document.createElement('div');
+            item.className = 'accordion-item';
+            item.innerHTML = `
+                <button class="accordion-header">
+                    <span>${displayName}</span>
+                    <span class="accordion-icon">▼</span>
+                </button>
+                <div class="accordion-content">
+                    <div class="accordion-inner">
+                        ${getText(service.key).replace(/\n/g, '<br>')}
+                        <button class="quick-btn" data-query="${service.key}">Ask about ${displayName}</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+        
+        document.querySelectorAll('.accordion-header').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const parent = btn.closest('.accordion-item');
+                parent.classList.toggle('open');
+            });
+        });
+        document.querySelectorAll('.quick-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const queryKey = btn.getAttribute('data-query');
+                const fullText = getText(queryKey);
+                addMessage(fullText, "bot", true);
+                speakResponse(fullText);
+                updateSystemStatus('Information displayed', 'info');
+            });
+        });
+    }
+
+    function setLanguage(lang) {
+        currentLang = lang;
+        chatBox.innerHTML = '';
+        addMessage(getText('welcome'), "bot", true);
+        addMessage("You can type your question or use the accordion cards on the right for detailed guides.", "bot", true);
+        buildAccordion();
+        updateSystemStatus('Language changed', 'info');
+    }
+
+    function toggleTheme() {
+        document.body.classList.toggle('dark');
+        const isDark = document.body.classList.contains('dark');
+        themeToggle.innerText = isDark ? "Light Mode" : "Dark Mode";
+        localStorage.setItem('theme', isDark ? 'dark' : 'light');
+        updateSystemStatus(isDark ? 'Dark mode active' : 'Light mode active', 'info');
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    voiceBtn.addEventListener('click', startVoice);
+    userInput.addEventListener('keypress', e => { if (e.key === 'Enter') sendMessage(); });
+    languageSelect.addEventListener('change', e => setLanguage(e.target.value));
+    themeToggle.addEventListener('click', toggleTheme);
+    
+    if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
+    themeToggle.innerText = document.body.classList.contains('dark') ? "Light Mode" : "Dark Mode";
+    setLanguage('en');
+</script>
+</body>
+</html>
